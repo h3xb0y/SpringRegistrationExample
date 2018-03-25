@@ -1,0 +1,25 @@
+sudo: false
+
+language: java
+jdk:
+  - oraclejdk8
+
+  
+before_script:  
+  - mysql -u root -e  'CREATE DATABASE db_demo; '
+  - mysql -u root -e  "CREATE USER 'root'@'localhost' IDENTIFIED BY 'pass';"
+  - mysql -u root -e  "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost';"
+  - mysql -u root -e  'FLUSH PRIVILEGES;'
+
+install: /bin/true
+
+script:
+  # pending: optimize clean/test steps
+  - mvn clean install -B -Dintegration_test_settings=`pwd`/test/travis-ci/components-persistence-mysql.properties
+  - mvn verify
+
+
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
