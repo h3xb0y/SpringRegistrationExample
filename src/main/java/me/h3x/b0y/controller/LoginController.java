@@ -83,8 +83,6 @@ public class LoginController {
 		modelAndView.setViewName("admin/home");
 		return modelAndView;
 	}
-	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@RequestMapping(value="/admin/database", method = RequestMethod.GET)
 	public ModelAndView database() throws SQLException {
