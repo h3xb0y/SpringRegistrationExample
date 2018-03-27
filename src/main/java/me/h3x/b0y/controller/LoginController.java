@@ -2,20 +2,35 @@ package me.h3x.b0y.controller;
 
 import javax.validation.Valid;
 
+
+import me.h3x.b0y.model.TableUser;
 import me.h3x.b0y.model.User;
 import me.h3x.b0y.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.sql.*;
+import java.util.ArrayList;
+
 @Controller
 public class LoginController {
-	
+	@Value("${spring.datasource.username}")
+	private String username;
+	@Value("${spring.datasource.url}")
+	private String url;
+	@Value("${spring.datasource.password}")
+	private String password;
+	@Value("${spring.queries.view-users}")
+    private String query;
+
 	@Autowired
 	private UserService userService;
 
@@ -68,6 +83,33 @@ public class LoginController {
 		modelAndView.setViewName("admin/home");
 		return modelAndView;
 	}
-	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+	@RequestMapping(value="/admin/database", method = RequestMethod.GET)
+	public ModelAndView database() throws SQLException {
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.setViewName("admin/database");
+		Connection con = DriverManager.getConnection(url, username, password);
+		Statement stmt = con.createStatement();
+
+		ArrayList<TableUser> list = new ArrayList<TableUser>();
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next())
+		{
+				TableUser user = new TableUser();
+				user.setId(rs.getString("user_id"));
+				user.setActive(rs.getString("active"));
+				user.setEmail(rs.getString("email"));
+				user.setLastName(rs.getString("last_name"));
+				user.setName(rs.getString("name"));
+				user.setPassword(rs.getString("password"));
+				list.add(user);
+		}
+		modelAndView.addObject("users",list);
+
+		return modelAndView;
+	}
+
 
 }
